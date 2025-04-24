@@ -233,7 +233,7 @@ class LorienTimer(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("定时设置")
-        self.setGeometry(100, 100, 500, 350)
+        self.setGeometry(100, 100, 600, 400)
         self.setFixedSize(self.width(), self.height())
 
         icon = QIcon(r'icon.ico')
@@ -265,7 +265,7 @@ class LorienTimer(QMainWindow):
         self.move(x, y)
 
     def show_about(self):
-        about_text = '作者：lorien，主页：<a href="https://hi-lorien.cn">hi-lorien.cn</a>'
+        about_text = '作者：lorien<br>主页：<a href="https://hi-lorien.cn">hi-lorien.cn</a>'
         QMessageBox.information(self, "关于", about_text)
 
     def update_countdown(self):
