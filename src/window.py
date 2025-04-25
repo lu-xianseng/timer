@@ -32,7 +32,8 @@ from src.styles import (
     set_line_edit_styles,
     set_button_styles, 
     set_checkbox_styles,
-    set_radio_styles
+    set_radio_styles,
+    set_table_styles,
     )
 from src.log import logger
 from src.command import run_cmd
@@ -288,7 +289,8 @@ class LorienTimer(QMainWindow):
         self.move(x, y)
 
     def show_about(self):
-        about_text = '作者：lorien<br>主页：<a href="https://hi-lorien.cn">hi-lorien.cn</a>'
+        about_text = ('作者：lorien<br>主页：<a href="https://hi-lorien.cn">hi-lorien.cn</a><br>'
+                      'Email:<a href="mailto:1173381395@qq.com">1173381395@qq.com</a>')
         QMessageBox.information(self, "关于", about_text)
 
     def update_countdown(self):
@@ -342,23 +344,27 @@ class LorienTimer(QMainWindow):
         table.setColumnCount(4)
         table.setHorizontalHeaderLabels(["动作", "时间", "日期", "操作"])
         table.setRowCount(len(tasks))
+        set_table_styles(table)
 
         for row, task in enumerate(tasks):
             task_id, action, hour, minute, day = task
             item_action = QTableWidgetItem(action)
+            item_action.setFlags(item_action.flags() & ~Qt.ItemIsEditable)
             item_action.setTextAlignment(Qt.AlignCenter)
             table.setItem(row, 0, item_action)
 
             item_time = QTableWidgetItem(f"{hour:02d}:{minute:02d}")
+            item_time.setFlags(item_time.flags() & ~Qt.ItemIsEditable)
             item_time.setTextAlignment(Qt.AlignCenter)
             table.setItem(row, 1, item_time)
 
             item_day = QTableWidgetItem(self.day_mapping[day])
+            item_day.setFlags(item_day.flags() & ~Qt.ItemIsEditable)
             item_day.setTextAlignment(Qt.AlignCenter)
             table.setItem(row, 2, item_day)
 
             cancel_button = QPushButton("取消计划")
-            set_button_styles(cancel_button, background_color='#EB4444', hover_color='#CC0000', padding='1px 10px')
+            set_button_styles(cancel_button, background_color='#EB4444', hover_color='#CC0000', padding='1px 3px')
             cancel_button.clicked.connect(lambda _, r=row, t_id=task_id: self.delete_task(t_id))
             table.setCellWidget(row, 3, cancel_button)
 
@@ -373,7 +379,7 @@ class LorienTimer(QMainWindow):
         bottom_button_layout.addWidget(cancel_all_button)
 
         back_button = QPushButton("返回")
-        set_button_styles(back_button, background_color='#0080FF', hover_color='#CC0000')
+        set_button_styles(back_button, background_color='#0080FF', hover_color='#3399FF')
         back_button.clicked.connect(self.return_to_main)
         bottom_button_layout.addWidget(back_button)
         view_layout.addLayout(bottom_button_layout)
