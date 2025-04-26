@@ -5,8 +5,11 @@
 # 设置页面
 
 通过时间点和循环日期设置系统重启和关机定时任务
-![设置页](image/settings-home.png)
+
+![设置页](image/settings.png)
 
 # 任务详情
 
-可对单个任务取消，也可以对所有任务进行全部取消 ![设置页](image/task-view.png)
+可对单个任务取消，也可以对所有任务进行全部取消
+
+![设置页](image/view.png)
