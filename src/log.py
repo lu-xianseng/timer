@@ -19,7 +19,7 @@ class Logger:
 
         # 配置普通日志文件处理器
         self.info_handler = logging.FileHandler(rf'{LOG_PATH}\\log.log', encoding='utf-8')
-        self.info_handler.setLevel(logging.INFO)
+        self.info_handler.setLevel(logging.DEBUG)
         info_formatter = logging.Formatter(
             '%(asctime)s - %(levelname)s - %(message)s')
         self.info_handler.setFormatter(info_formatter)

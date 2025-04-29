@@ -2,6 +2,7 @@
 # coding=utf-8
 # @Time     :2025/4/24 16:47
 # @Author   :luye
+import os
 import time
 from PyQt5.QtWidgets import (
     QApplication, 
@@ -37,8 +38,8 @@ from src.styles import (
     )
 from src.log import logger
 from src.command import run_cmd
-from src.settings import RES_PATH
-
+from src.settings import RES_PATH, PLUGIN
+logger.info(RES_PATH)
 
 
 class LorienTimer(QMainWindow):
@@ -65,6 +66,7 @@ class LorienTimer(QMainWindow):
             7: "SUN"
         }
         self.action = "关机"
+        self.task_prefix = 'LORIENTIMER_'
         self.db_action = ''
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_countdown)
@@ -152,11 +154,17 @@ class LorienTimer(QMainWindow):
     def check_and_delete_task(self, task_name):
         try:
             command = f'schtasks /query /tn "{task_name}"'
-            result = run_cmd(command)
-            if result[0] == 0:
+            code, _ = run_cmd(command)
+            if code == 0:
                 command = f'schtasks /delete /tn "{task_name}" /f'
-                run_cmd(command)
+                code, result = run_cmd(command)
+                if code == 0:
+                    logger.info(f"{task_name}, Delete success")
+                else:
+                    logger.info(f"{task_name}, Delete failed")
+                    logger.error(result)
         except Exception as e:
+            logger.warning(e)
             pass
 
     def set_task(self):
@@ -172,22 +180,27 @@ class LorienTimer(QMainWindow):
                 if self.selected_days:
                     for day in self.selected_days:
                         # 删除相同动作和日期的旧任务
-                        old_task_name = f"{self.action}Task_{self.day_mapping[day]}"
+                        old_task_name = f"{self.task_prefix}{self.action}Task_{self.day_mapping[day]}"
                         self.check_and_delete_task(old_task_name)
                         self.db_manager.delete_tasks_by_action_and_day(self.action, day)
 
-                        new_task_name = f"{self.action}Task_{self.day_mapping[day]}"
+                        new_task_name = f"{self.task_prefix}{self.action}Task_{self.day_mapping[day]}"
                         if self.action == "关机":
-                            command = f'schtasks /create /tn "{new_task_name}" /tr "shutdown /s /t 0" /sc weekly /d {self.weekday_abbr_mapping[day]} /st {hour:02d}:{minute:02d}'
+                            command = fr'schtasks /create /tn "{new_task_name}" /tr "\"{PLUGIN}\" s 20 TJhgy78uYH" /sc weekly /d {self.weekday_abbr_mapping[day]} /st {hour:02d}:{minute:02d}' 
                         else:
-                            command = f'schtasks /create /tn "{new_task_name}" /tr "shutdown /r /t 0" /sc weekly /d {self.weekday_abbr_mapping[day]} /st {hour:02d}:{minute:02d}'
-                        run_cmd(command)
+                            command = fr'schtasks /create /tn "{new_task_name}" /tr "\"{PLUGIN}\" r 20 TJhgy78uYH" /sc weekly /d {self.weekday_abbr_mapping[day]} /st {hour:02d}:{minute:02d}'
+                        code, stdout = run_cmd(command)
+                        if code == 0:
+                            logger.info(f"{new_task_name}, Create success")
+                        else:
+                            logger.error(f"{new_task_name}, Create failed")
+                            logger.debug(stdout)
                         self.db_manager.insert_task(self.action, hour, minute, day)
                         self.db_action = self.action
 
                     self.shutdown_time = (hour, minute, self.selected_days)
                     QMessageBox.information(self, "成功", f"定时{self.action}设置成功！")
-                    logger.info(f"定时器启动，shutdown_time: {self.shutdown_time}")
+                    logger.info(f"Timer enable, : {self.shutdown_time}")
                     self.timer.start(1000)
                     self.update_countdown()
                 else:
@@ -202,7 +215,7 @@ class LorienTimer(QMainWindow):
         for task in tasks:
             action = task[1]
             day = task[4]
-            task_name = f"{action}Task_{self.day_mapping[day]}"
+            task_name = f"{self.task_prefix}{action}Task_{self.day_mapping[day]}"
             self.check_and_delete_task(task_name)
         self.db_manager.delete_all_tasks()
 
@@ -248,7 +261,7 @@ class LorienTimer(QMainWindow):
                     self.shutdown_radio.setChecked(True)
                 else:
                     self.restart_radio.setChecked(True)
-                logger.info(f"检查到现有任务，shutdown_time: {self.shutdown_time}")
+                logger.info(f"Current task: {self.shutdown_time}")
                 self.timer.start(1000)
                 self.update_countdown()
         else:
@@ -297,7 +310,6 @@ class LorienTimer(QMainWindow):
         if self.shutdown_time:
             now = time.localtime()
             hour, minute, days = self.shutdown_time
-            logger.info(f"当前时间: {time.strftime('%Y-%m-%d %H:%M:%S', now)}, 设置时间: {hour}:{minute}, 循环日期: {days}")
             next_time = None
             for day in days:
                 target_time = time.mktime(now)
@@ -311,7 +323,6 @@ class LorienTimer(QMainWindow):
                     target_time += 7 * 24 * 60 * 60
                 if next_time is None or target_time < next_time:
                     next_time = target_time
-            logger.info(f"下一次任务时间: {next_time if next_time else '未找到'}")
             if next_time:
                 remaining_seconds = int(next_time - time.mktime(now))
                 if remaining_seconds > 0:
@@ -396,7 +407,8 @@ class LorienTimer(QMainWindow):
         task = self.db_manager.get_task_by_id(task_id)
         if task:
             action, day = task[1], task[4]
-            task_name = f"{action}Task_{self.day_mapping[day]}"
+            task_name = f"{self.task_prefix}{action}Task_{self.day_mapping[day]}"
             self.check_and_delete_task(task_name)
             self.db_manager.delete_task(task_id)
         self.view_tasks()
+

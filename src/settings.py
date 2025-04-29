@@ -4,10 +4,13 @@
 # @Author   :luye
 import os
 
-LOG_PATH = 'logs'
-DB_PATH = 'db'
-RES_PATH = 'resources'
-
+ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+LOG_PATH = os.path.join(ROOT_PATH, 'logs')
+DB_PATH = os.path.join(ROOT_PATH, 'db')
+RES_PATH = os.path.join(ROOT_PATH, 'resources')
+PLUGIN = os.path.join(ROOT_PATH, 'plugin.exe')
 for folder in [LOG_PATH, DB_PATH]:
     if not os.path.exists(folder):
         os.makedirs(folder)
+        
+print(LOG_PATH)
