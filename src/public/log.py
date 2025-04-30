@@ -5,7 +5,7 @@
 
 import logging
 import traceback
-from src.settings import LOG_PATH
+from src.public.settings import LOG_PATH
 
 
 class Logger:

@@ -5,8 +5,8 @@
 
 import sys
 import ctypes
-from src.log import _excepthook
-from src.window import LorienTimer
+from src.public.log import _excepthook
+from src.views.view import Timer
 from PyQt5.QtWidgets import QApplication
 
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # 创建一个 QApplication 实例，这是 PyQt5 应用程序的基础
     app = QApplication(sys.argv)
     # 创建 LorienTimer 类的实例，这是主窗口类
-    timer = LorienTimer()
+    timer = Timer()
     # 显示主窗口
     timer.show()
     # 进入应用程序的主循环，等待用户交互和事件处理

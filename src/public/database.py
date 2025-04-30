@@ -4,7 +4,7 @@
 # @Author   :luye
 
 import sqlite3
-from src.settings import DB_PATH
+from src.public.settings import DB_PATH
 
 class DatabaseManager:
     def __init__(self, db_name=rF'{DB_PATH}\\data.db'):

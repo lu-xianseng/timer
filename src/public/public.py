@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 # coding=utf-8
-# @Time     :2025/4/24 16:47
+# @Time     :2025/4/25 09:10
 # @Author   :luye
-
 import subprocess
 import locale
-from src.log import logger
+from src.public.log import logger
 default_encoding = locale.getdefaultlocale()[1]
+from src.public.settings import PREFIXES
+
+def task_name(action, _date):
+    return f"{PREFIXES}{action}_Task_{_date}"
+
+
 
 def run_cmd(command, text=True):
     try:

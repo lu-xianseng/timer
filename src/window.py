@@ -38,8 +38,17 @@ from src.styles import (
     )
 from src.log import logger
 from src.command import run_cmd
-from src.settings import RES_PATH, PLUGIN
-logger.info(RES_PATH)
+from src.settings import (
+    RES_PATH, 
+    PLUGIN, 
+    KEY, 
+    ACTION_EN_MAPPING,
+    ACTION_ZH_MAPPING,
+    DAY_MAPPING,
+    WEEKDAY_MAPPING,
+    WAIT_TIME,
+    )
+from src.public import task_name
 
 
 class LorienTimer(QMainWindow):
@@ -47,27 +56,9 @@ class LorienTimer(QMainWindow):
         super().__init__()
         self.shutdown_time = None
         self.selected_days = []
-        self.day_mapping = {
-            1: "周一",
-            2: "周二",
-            3: "周三",
-            4: "周四",
-            5: "周五",
-            6: "周六",
-            7: "周日"
-        }
-        self.weekday_abbr_mapping = {
-            1: "MON",
-            2: "TUE",
-            3: "WED",
-            4: "THU",
-            5: "FRI",
-            6: "SAT",
-            7: "SUN"
-        }
-        self.action = "关机"
-        self.task_prefix = 'LORIENTIMER_'
-        self.db_action = ''
+
+        self.action = 0
+        self.action_lable_text = ACTION_ZH_MAPPING[int(self.action)]
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_countdown)
         self.db_manager = DatabaseManager()
@@ -89,10 +80,10 @@ class LorienTimer(QMainWindow):
         self.countdown_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.countdown_label)
 
-        shutdown_layout = QVBoxLayout()
-        shutdown_label = QLabel("时间设置（24小时制）")
-        set_label_styles(shutdown_label, font_size=12, bold=True)
-        shutdown_layout.addWidget(shutdown_label)
+        time_set_layout = QVBoxLayout()
+        text_label = QLabel("时间设置（24小时制）")
+        set_label_styles(text_label, font_size=12, bold=True, location='left')
+        time_set_layout.addWidget(text_label, alignment=Qt.AlignBottom)
 
         time_layout = QHBoxLayout()
         hour_label = QLabel("点")
@@ -107,10 +98,15 @@ class LorienTimer(QMainWindow):
         set_line_edit_styles(self.minute_entry)
         time_layout.addWidget(self.minute_entry)
         time_layout.addWidget(minute_label)
-        shutdown_layout.addLayout(time_layout)
+        time_set_layout.addLayout(time_layout)
 
-        main_layout.addLayout(shutdown_layout)
-
+        main_layout.addLayout(time_set_layout)
+        
+        date_set_layout = QVBoxLayout()
+        date_label = QLabel("日期设置")
+        set_label_styles(date_label, font_size=12, bold=True, location='left')
+        date_set_layout.addWidget(date_label, alignment=Qt.AlignBottom)
+        
         day_layout = QHBoxLayout()
         day_labels = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
         self.day_checkboxes = []
@@ -119,6 +115,7 @@ class LorienTimer(QMainWindow):
             set_checkbox_styles(checkbox)
             day_layout.addWidget(checkbox)
             self.day_checkboxes.append(checkbox)
+        main_layout.addLayout(date_set_layout)
         main_layout.addLayout(day_layout)
 
         action_layout = QHBoxLayout()
@@ -146,10 +143,7 @@ class LorienTimer(QMainWindow):
         return central_widget
 
     def set_action(self):
-        if self.shutdown_radio.isChecked():
-            self.action = "关机"
-        else:
-            self.action = "重启"
+         self.action = 0 if self.shutdown_radio.isChecked() else 1
 
     def check_and_delete_task(self, task_name):
         try:
@@ -178,29 +172,29 @@ class LorienTimer(QMainWindow):
                         self.selected_days.append(i + 1)
 
                 if self.selected_days:
+                    action_en = ACTION_EN_MAPPING[int(self.action)]
+                    action_zh = ACTION_ZH_MAPPING[int(self.action)]
                     for day in self.selected_days:
                         # 删除相同动作和日期的旧任务
-                        old_task_name = f"{self.task_prefix}{self.action}Task_{self.day_mapping[day]}"
-                        self.check_and_delete_task(old_task_name)
+                        name = task_name(action_en, WEEKDAY_MAPPING[day])
+                        self.check_and_delete_task(name)
                         self.db_manager.delete_tasks_by_action_and_day(self.action, day)
 
-                        new_task_name = f"{self.task_prefix}{self.action}Task_{self.day_mapping[day]}"
-                        if self.action == "关机":
-                            command = fr'schtasks /create /tn "{new_task_name}" /tr "\"{PLUGIN}\" s 20 TJhgy78uYH" /sc weekly /d {self.weekday_abbr_mapping[day]} /st {hour:02d}:{minute:02d}' 
+                        if action_en == "shutdown":
+                            command = fr'schtasks /create /tn "{name}" /tr "\"{PLUGIN}\" s {WAIT_TIME} {KEY}" /sc weekly /d {WEEKDAY_MAPPING[day]} /st {hour:02d}:{minute:02d}' 
                         else:
-                            command = fr'schtasks /create /tn "{new_task_name}" /tr "\"{PLUGIN}\" r 20 TJhgy78uYH" /sc weekly /d {self.weekday_abbr_mapping[day]} /st {hour:02d}:{minute:02d}'
+                            command = fr'schtasks /create /tn "{name}" /tr "\"{PLUGIN}\" r {WAIT_TIME} {KEY}" /sc weekly /d {WEEKDAY_MAPPING[day]} /st {hour:02d}:{minute:02d}'
                         code, stdout = run_cmd(command)
                         if code == 0:
-                            logger.info(f"{new_task_name}, Create success")
+                            self.action_lable_text = ACTION_ZH_MAPPING[int(self.action)]
+                            self.db_manager.insert_task(self.action, hour, minute, day)
+                            logger.info(f"{name}, Create success")
                         else:
-                            logger.error(f"{new_task_name}, Create failed")
+                            logger.error(f"{name}, Create failed")
                             logger.debug(stdout)
-                        self.db_manager.insert_task(self.action, hour, minute, day)
-                        self.db_action = self.action
-
                     self.shutdown_time = (hour, minute, self.selected_days)
-                    QMessageBox.information(self, "成功", f"定时{self.action}设置成功！")
-                    logger.info(f"Timer enable, : {self.shutdown_time}")
+                    QMessageBox.information(self, "成功", f"定时{action_zh}设置成功！")
+                    logger.info(f"Timer enable, {self.shutdown_time}")
                     self.timer.start(1000)
                     self.update_countdown()
                 else:
@@ -215,14 +209,15 @@ class LorienTimer(QMainWindow):
         for task in tasks:
             action = task[1]
             day = task[4]
-            task_name = f"{self.task_prefix}{action}Task_{self.day_mapping[day]}"
-            self.check_and_delete_task(task_name)
+            action_en = ACTION_EN_MAPPING[int(action)]
+            name = task_name(action_en, WEEKDAY_MAPPING[day])
+            self.check_and_delete_task(name)
         self.db_manager.delete_all_tasks()
 
         self.shutdown_time = None
         self.timer.stop()
         self.countdown_label.setText("未设置定时任务")
-        self.countdown_label.setStyleSheet("QLabel { color: green; }")
+        set_label_styles(self.countdown_label, font_size=14, color='green')
         QMessageBox.information(self, "成功", "定时关机或重启已取消！")
         # 返回主页面
         self.stacked_widget.setCurrentWidget(self.main_widget)
@@ -256,7 +251,6 @@ class LorienTimer(QMainWindow):
             if next_time:
                 self.shutdown_time = (next_time[1], next_time[2], next_time[3])
                 self.action = next_time[4]
-                self.db_action = next_time[4]
                 if self.action == "关机":
                     self.shutdown_radio.setChecked(True)
                 else:
@@ -266,6 +260,7 @@ class LorienTimer(QMainWindow):
                 self.update_countdown()
         else:
             self.countdown_label.setText("未设置定时任务")
+            set_label_styles(self.countdown_label, font_size=14, color='green')
             self.shutdown_time = None
 
     def initUI(self):
@@ -329,21 +324,13 @@ class LorienTimer(QMainWindow):
                     days, remaining_seconds = divmod(remaining_seconds, 86400)
                     hours, remaining_seconds = divmod(remaining_seconds, 3600)
                     minutes, seconds = divmod(remaining_seconds, 60)
-                    countdown_str = f"{days}天 {hours:02d}时 {minutes:02d}分 {seconds:02d}秒 后 {self.db_action}"
+                    countdown_str = f"{days}天 {hours:02d}时 {minutes:02d}分 {seconds:02d}秒 后 {self.action_lable_text}"
                     self.countdown_label.setText(countdown_str)
-                    self.countdown_label.setStyleSheet("QLabel { color: red; }")
-                else:
-                    self.timer.stop()
-                    self.countdown_label.setText("未设置定时任务")
-                    self.countdown_label.setStyleSheet("QLabel { color: green; }")
-            else:
-                self.timer.stop()
-                self.countdown_label.setText("未设置定时任务")
-                self.countdown_label.setStyleSheet("QLabel { color: green; }")
-        else:
+                    set_label_styles(self.countdown_label, font_size=14, color='red')
+                    return
             self.timer.stop()
             self.countdown_label.setText("未设置定时任务")
-            self.countdown_label.setStyleSheet("QLabel { color: green; }")
+            set_label_styles(self.countdown_label, font_size=14, color='green')
 
     def view_tasks(self):
         tasks = self.db_manager.get_all_tasks()
@@ -359,6 +346,7 @@ class LorienTimer(QMainWindow):
 
         for row, task in enumerate(tasks):
             task_id, action, hour, minute, day = task
+            action = '关机' if action == '0' else '重启'
             item_action = QTableWidgetItem(action)
             item_action.setFlags(item_action.flags() & ~Qt.ItemIsEditable)
             item_action.setTextAlignment(Qt.AlignCenter)
@@ -369,7 +357,7 @@ class LorienTimer(QMainWindow):
             item_time.setTextAlignment(Qt.AlignCenter)
             table.setItem(row, 1, item_time)
 
-            item_day = QTableWidgetItem(self.day_mapping[day])
+            item_day = QTableWidgetItem(DAY_MAPPING[day])
             item_day.setFlags(item_day.flags() & ~Qt.ItemIsEditable)
             item_day.setTextAlignment(Qt.AlignCenter)
             table.setItem(row, 2, item_day)
@@ -400,15 +388,18 @@ class LorienTimer(QMainWindow):
         self.stacked_widget.setCurrentWidget(view_widget)
 
     def return_to_main(self):
+        self.action = 0
         self.stacked_widget.setCurrentWidget(self.main_widget)
         self.check_existing_tasks()
 
     def delete_task(self, task_id):
         task = self.db_manager.get_task_by_id(task_id)
+        logger.debug(task)
         if task:
             action, day = task[1], task[4]
-            task_name = f"{self.task_prefix}{action}Task_{self.day_mapping[day]}"
-            self.check_and_delete_task(task_name)
+            action_en = ACTION_EN_MAPPING[int(action)]
+            name = task_name(action_en, WEEKDAY_MAPPING[day])
+            self.check_and_delete_task(name)
             self.db_manager.delete_task(task_id)
         self.view_tasks()
 

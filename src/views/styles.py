@@ -6,13 +6,16 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
 
-def set_label_styles(label, font_size=12, color='#333', bold=False):
+def set_label_styles(label, font_size=12, color='#333', bold=False, location='center'):
     font = QFont("Arial", font_size)
     if bold:
         font.setBold(True)
     label.setFont(font)
     label.setStyleSheet(f"QLabel {{ color: {color}; }}")
-    label.setAlignment(Qt.AlignLeft)
+    if location == 'left':
+        label.setAlignment(Qt.AlignLeft)
+    if location == 'center':
+        label.setAlignment(Qt.AlignCenter)
 
 
 def set_checkbox_styles(label, font_size=12, color='#333', bold=False):

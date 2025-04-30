@@ -18,7 +18,7 @@ AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL}
+AppSupportURL={#MyAppURL} 
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
@@ -38,6 +38,7 @@ OutputBaseFilename=Timer Setup
 SetupIconFile=D:\lorien-timer\dist\Timer\resources\icon.ico
 SolidCompression=yes
 WizardStyle=modern
+InfoBeforeFile=D:\lorien-timer\resources\readme.txt
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
