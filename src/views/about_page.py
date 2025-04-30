@@ -9,12 +9,7 @@ from PyQt5.QtWidgets import (
 class AboutPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.input_field = QLineEdit(self)
-        self.label = QLabel('页面 2 标签', self)
         layout = QVBoxLayout()
-        layout.addWidget(self.input_field)
-        layout.addWidget(self.label)
+        label = QLabel("关于页面", self)
+        layout.addWidget(label)
         self.setLayout(layout)

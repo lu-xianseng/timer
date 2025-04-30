@@ -45,7 +45,7 @@ class Logger:
 logger = Logger()
 
 
-def _excepthook(type_, value, traceback_):
+def def_excepthook(type_, value, traceback_):
     # 记录异常信息到日志文件
     logger.error(
         "Uncaught exception", exc_info=(type_, value, traceback_))
