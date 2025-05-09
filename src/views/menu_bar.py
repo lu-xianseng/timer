@@ -17,13 +17,13 @@ class MenuBarView(QMenuBar):
         self.setup_actions()
 
     def initUI(self):
-        self.view_task_action = QAction('✔ 查看计划', self)
+        self.view_task_action = QAction('√ 查看计划', self)
         self.view_task_action.triggered.connect(self.switch_action)
 
         self.set_task_action = QAction('☼ 设置计划', self)
         self.set_task_action.triggered.connect(self.switch_action)
 
-        self.about_action = QAction('☺ 关于', self)
+        self.about_action = QAction('❉ 关于', self)
 
     def setup_actions(self):
         # 清空菜单栏

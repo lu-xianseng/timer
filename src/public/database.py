@@ -7,6 +7,7 @@ import sqlite3
 from src.public.settings import DB_PATH
 
 class DatabaseManager:
+    
     def __init__(self, db_name=rF'{DB_PATH}\\data.db'):
         self.db_name = db_name
         self.create_table()
@@ -67,3 +68,5 @@ class DatabaseManager:
         task = c.fetchone()
         conn.close()
         return task
+
+
