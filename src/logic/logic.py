@@ -4,48 +4,87 @@
 # @Author   :luye
 import os
 import time
+
+from PyQt5.QtWidgets import QMessageBox
+
 from src.public.database import DatabaseManager
 from src.public.log import logger
 from src.public.public import run_cmd
 from src.public.settings import (
-    RES_PATH, 
-    PLUGIN, 
-    KEY, 
+    RES_PATH,
+    PLUGIN,
+    KEY,
     ACTION_EN_MAPPING,
     ACTION_ZH_MAPPING,
     DAY_MAPPING,
     WEEKDAY_MAPPING,
     WAIT_TIME,
-    )
+    WORLD_DICT
+)
 from src.public.public import task_name
-from src.views.set_task_page import SetTaskPage
-from src.views.view_task_page import ViewTaskPage
-from src.views.about_page import AboutPage
+
 
 class Logic:
-    def __init__(self, stacked_widget, menu_bar):
-        self.stacked_widget = stacked_widget
-        self.set_task_page = SetTaskPage()
-        self.about_page = AboutPage()
-        self.view_task_page = ViewTaskPage()
 
-        self.action = 0
+    def __init__(self):
+        self.db = DatabaseManager()
 
-        self.menu_bar = menu_bar
+    def __parse_task(self,  _time, action, loop, day):
+        # 获取设置的时间
+        selected_time = _time.time()
+        hour = selected_time.hour()
+        minute = selected_time.minute()
+        action_type = action.currentText()
+        loop_type = loop.currentText()
+        day_text = ''
+        day_index = 0
+        if day.isVisible():
+            day_text = day.currentText()
+            day_index = day.currentIndex() + 1
+        return hour, minute, day_text, day_index, action_type, loop_type
 
-        self.stacked_widget.addWidget(self.set_task_page)
-        self.stacked_widget.addWidget(self.about_page)
-        self.stacked_widget.addWidget(self.view_task_page)
-        self.connect_signals()
+    def add_task(self, _time, action, loop, day):
+        """添加任务按钮的槽函数"""
+        # 获取设置的时间
+        hour, minute, day_text, day_index, action_type, loop_type = self.__parse_task(_time, action, loop, day)
+        task_info = f"Task setting: {hour}:{minute}, operation: {WORLD_DICT[action_type]}, loop: {WORLD_DICT[loop_type]}"
+        if day.isVisible():
+            task_info += f", date: {day.currentIndex() + 1}"
 
-    def connect_signals(self):
-        self.menu_bar.view_task_action.triggered.connect(
-            lambda: self.stacked_widget.setCurrentWidget(self.view_task_page))
-        self.menu_bar.set_task_action.triggered.connect(
-            lambda: self.stacked_widget.setCurrentWidget(self.set_task_page))
-        self.menu_bar.about_action.triggered.connect(
-            lambda: self.stacked_widget.setCurrentWidget(self.about_page))
+        logger.info(task_info)
+        res = self.db.insert_task(
+            action=action_type,
+            hour=hour,
+            minute=minute,
+            loop=loop_type,
+            day=day_text,
+        )
+        info = {
+            "action": action_type,
+            "hour": hour,
+            "minute": minute,
+            "loop": loop_type,
+            "day": day_text,
+        }
+        return res.get('success'), info
 
-    def set_action(self, is_shutdown):
-        self.action = 0 if is_shutdown else 1
+    def get_all_tasks(self):
+        res = self.db.get_all_tasks()
+        return res.get('success'), res.get('tasks')
 
+
+    def delete_task(self, task_id):
+        res = self.db.delete_task(task_id)
+        logger.info('Deleted task {}'.format(task_id))
+        return res.get('success')
+
+    def exists_task(self, _time, action, loop, day):
+        hour, minute, day_text, day_index, action_type, loop_type = self.__parse_task(_time, action, loop, day)
+        res = self.db.query_tasks(
+            action=action_type,
+            hour=hour,
+            minute=minute,
+            loop=loop_type,
+            day=day_text,
+        )
+        return True if res.get('tasks') else False

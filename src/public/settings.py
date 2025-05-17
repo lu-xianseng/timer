@@ -42,4 +42,13 @@ ACTION_EN_MAPPING = {
     0: 'shutdown',
     1: 'reboot',
 }
+
+WORLD_DICT = {
+    '重启': 'reboot',
+    '关机': 'shutdown',
+    '每天': 'daily',
+    '每月': 'monthly',
+    '每周': 'weekly',
+    '日': 'day',
+}
         

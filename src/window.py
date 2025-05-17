@@ -325,7 +325,7 @@ class LorienTimer(QMainWindow):
                     hours, remaining_seconds = divmod(remaining_seconds, 3600)
                     minutes, seconds = divmod(remaining_seconds, 60)
                     countdown_str = f"{days}天 {hours:02d}时 {minutes:02d}分 {seconds:02d}秒 后 {self.action_lable_text}"
-                    self.countdown_label.setText(countdown_str)
+
                     set_label_styles(self.countdown_label, font_size=14, color='red')
                     return
             self.timer.stop()
