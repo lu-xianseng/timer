@@ -35,10 +35,10 @@ DisableProgramGroupPage=yes
 ;PrivilegesRequired=lowest
 OutputDir=D:\
 OutputBaseFilename=Timer Setup
-SetupIconFile=D:\lorien-timer\dist\Timer\resources\icon.ico
+SetupIconFile=E:\lxs-project\timer\dist\Timer\resources\icon.ico
 SolidCompression=yes
 WizardStyle=modern
-InfoBeforeFile=D:\lorien-timer\resources\readme.txt
+InfoBeforeFile=E:\lxs-project\timer\resources\readme.txt
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -50,8 +50,8 @@ Name: "addtopath"; Description: "Add application directory to system PATH enviro
 
 
 [Files]
-Source: "D:\lorien-timer\dist\Timer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\lorien-timer\dist\Timer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "E:\lxs-project\timer\dist\Timer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\lxs-project\timer\dist\Timer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

@@ -212,6 +212,7 @@ class LorienTimer(QMainWindow):
             action_en = ACTION_EN_MAPPING[int(action)]
             name = task_name(action_en, WEEKDAY_MAPPING[day])
             self.check_and_delete_task(name)
+            self.check_and_delete_task(name)
         self.db_manager.delete_all_tasks()
 
         self.shutdown_time = None

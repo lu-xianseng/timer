@@ -4,18 +4,18 @@
 # @Author   :luye
 
 import sys
-import ctypes
 
-from PyQt5.QtCore import Qt, QDateTime
+from PyQt5.QtCore import Qt, QDateTime, QTimer
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QStackedWidget, QVBoxLayout, QWidget, QMenu,
-    QAction, QTabWidget, QLabel, QHBoxLayout, QPushButton, QComboBox, QTimeEdit,
-    QGridLayout, QGroupBox,  QTableWidget, QTableWidgetItem, QHeaderView,
+    QApplication, QMainWindow, QStackedWidget, QVBoxLayout, QWidget,
+    QTabWidget, QLabel, QHBoxLayout, QPushButton, QComboBox, QTimeEdit,
+    QGridLayout, QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
     QTextBrowser, QMessageBox,
 )
 from PyQt5.QtGui import QPalette, QColor, QIcon
 from src.logic.logic import Logic
-from src.public.settings import RES_PATH, DAY_MAPPING
+from src.public.log import logger
+from src.public.settings import RES_PATH, WAIT_TIME
 from src.views.styles import (
     set_checkbox_styles,
     set_label_styles,
@@ -26,18 +26,21 @@ from src.views.styles import (
 class MainWindow(QMainWindow):
     def __init__(self, action='0'):
         super().__init__()
-        self.countdown_txt = "\n\n未设置定时任务"
+        self.action = action
+        self.remaining_time = WAIT_TIME
+        self.countdown_txt = ""
+        self.countdown_txt_with_sub = ""
         self.current_task_info = None
         self.tasks_table = None
         self.text = ''
-        self.remaining_time = 20
         self.day_selection = None
         self.loop_combo = None
         self.loop_label = None
         self.time_edit = None
         self.action_combo = None
         self.date_label = None
-        self.countdown_label = None
+        self.countdown_label_with_sub = QLabel(self.countdown_txt_with_sub)
+        self.countdown_label = QLabel(self.countdown_txt)
         self.about_tab = None
         self.view_tasks_tab = None
         self.setup_task_tab = None
@@ -50,11 +53,18 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
+        self.timer = QTimer(self)
+        if int(action[-1]) == 0:
+            self.init_main_window()
+            self.timer.timeout.connect(self.update_countdown)
+        else:
+            self.init_sub_window()
+            self.timer.timeout.connect(self.update_countdown_with_sub)
+        self.timer.start(1000)
 
-        self.init_main_window() if int(action[-1]) == 0 else self.init_sub_window(action)
-
-    def init_sub_window(self, action):
+    def init_sub_window(self):
         self.setWindowTitle("计划执行")
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setGeometry(100, 100, 300, 100)
         self.setFixedSize(self.width(), self.height())
         icon = QIcon(rf'{RES_PATH}\\icon.ico')
@@ -70,23 +80,39 @@ class MainWindow(QMainWindow):
         # 创建主布局
 
         layout = QVBoxLayout(central_widget)
-        if action[3].lower() == 's':
+        if self.action[3].lower() == 's':
             self.text = '关机'
-        elif action[3].lower() == 'r':
+        elif self.action[3].lower() == 'r':
             self.text = '重启'
         else:
             sys.exit(1)
 
-        self.label = QLabel(f"系统将在 {action[7]}0 秒后 {self.text}...", self)
-        set_label_styles(self.label, font_size=12, color='red', bold=True)
-        layout.addWidget(self.label)
+
+        set_label_styles(self.countdown_label_with_sub, font_size=12, color='red', bold=True)
+        layout.addWidget(self.countdown_label_with_sub)
 
         self.cancel_button = QPushButton('取消', self)
         set_button_styles(self.cancel_button, background_color='#EB4444', hover_color='#CC0000')
-        # self.cancel_button.clicked.connect(self.cancel_action)
+        self.cancel_button.clicked.connect(self.cancel_action)
         layout.addWidget(self.cancel_button)
 
         self.move_window()
+
+    def update_countdown_with_sub(self):
+        self.remaining_time -= 1
+        self.countdown_txt_with_sub = f"系统将在 {self.remaining_time} 秒后 {self.text}..."
+        self.countdown_label_with_sub.setText(self.countdown_txt_with_sub)
+
+        if self.remaining_time < 1:
+            if self.action[3].lower() == 's':
+                self.logic.execute_action('shutdown')
+            elif self.action[3].lower() == 'r':
+                self.logic.execute_action('reboot')
+            self.timer.stop()
+
+
+    def cancel_action(self):
+        self.close()
 
     def init_main_window(self):
         self.setWindowTitle("定时设置")
@@ -152,7 +178,6 @@ class MainWindow(QMainWindow):
         set_layout.setContentsMargins(0, 0, 0, 0)
         set_layout.setSpacing(8)
 
-        self.countdown_label = QLabel(self.countdown_txt)
         set_label_styles(self.countdown_label, font_size=14, color='green', bold=True)
         self.countdown_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.countdown_label)
@@ -219,6 +244,12 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(bottom_layout)
         main_layout.setStretchFactor(set_layout, 1)  # 顶部布局占据弹性空间
 
+    def update_countdown(self):
+        state, text = self.logic.next_task()
+        color = 'red' if state else 'green'
+        self.countdown_label.setText(text)
+        set_label_styles(self.countdown_label, font_size=14, color=color, bold=True)
+
     def add_task(self):
         if self.logic.exists_task(
                 self.time_edit,
@@ -229,16 +260,15 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, '错误', "已存在此任务")
             return
         res, info = self.logic.add_task(
-                self.time_edit,
-                self.action_combo,
-                self.loop_combo,
-                self.day_selection
+            self.time_edit,
+            self.action_combo,
+            self.loop_combo,
+            self.day_selection
         )
         if res:
             QMessageBox.information(self, '消息', "添加任务成功")
         self.current_task_info = info
-        self.countdown_label.setText('ttttttt')
-
+        # self.update_countdown()
 
     def show_hide_day_selection(self, index):  # 必须接收 index 参数
         self.day_selection.clear()
