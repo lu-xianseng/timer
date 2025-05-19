@@ -6,18 +6,19 @@
 #define MyAppPublisher "lorien"
 #define MyAppURL "https://hi-lorien.cn/"
 #define MyAppExeName "timer.exe"
-#define project_path "D:\lorien-timer"
 
 [Setup]
+; Tell Windows Explorer to reload the environment
+ChangesEnvironment=yes
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{2003575B-49B3-48F7-AF36-BC2145AC15FD}
+AppId={{0510EE5B-8884-4DA7-A084-BE2D8FD3AF77}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL}
+AppSupportURL={#MyAppURL} 
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
@@ -33,20 +34,24 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 OutputDir=D:\
-OutputBaseFilename=lorien timer setup
-SetupIconFile={#project_path}\dist\Timer\resources\icon.ico
+OutputBaseFilename=Timer Setup
+SetupIconFile=E:\lxs-project\timer\dist\Timer\resources\icon.ico
 SolidCompression=yes
 WizardStyle=modern
+InfoBeforeFile=E:\lxs-project\timer\resources\readme.txt
 
 [Languages]
-Name: "chineses"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+; Name: "addtopath"; Description: "Add application directory to system PATH environment variable"; GroupDescription: "Additional tasks:"; Flags: exclusive
+
 
 [Files]
-Source: "{#project_path}\dist\Timer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#project_path}\dist\Timer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "E:\lxs-project\timer\dist\Timer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\lxs-project\timer\dist\Timer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -56,5 +61,5 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
-[Dirs]
-Name: {app}; Permissions: users-full
+[Registry]
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "Lorien Timer"; ValueData: "{app}/"; Flags: preservestringtype

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # coding=utf-8
-# @Time     :2025/4/25 09:10
+# @Time     :2025/5/18 09:10
 # @Author   :luye
 import os
 
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 # ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(ROOT_PATH)
+# print(ROOT_PATH)
 LOG_PATH = os.path.join(ROOT_PATH, 'logs')
 DB_PATH = os.path.join(ROOT_PATH, 'db')
 RES_PATH = os.path.join(ROOT_PATH, 'resources')
@@ -14,7 +14,6 @@ for folder in [LOG_PATH, DB_PATH]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 PREFIXES = 'LORIENTIMER_'
-KEY = 'TJhgy78uYH'
 WAIT_TIME = 20
 
 WEEKDAY_MAPPING = {

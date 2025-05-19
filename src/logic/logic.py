@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # coding=utf-8
-# @Time     :2025/4/24 16:47
+# @Time     :2025/5/18 16:47
 # @Author   :luye
 
 import datetime
@@ -139,9 +139,9 @@ class Logic:
     def execute_action(action):
         if action == "shutdown":
             logger.info('Shutdown now')
-            # os.system("shutdown /s /t 0")
+            os.system("shutdown /s /t 0")
             os.system("dir")
         elif action == "reboot":
             logger.info('Reboot now')
-            # os.system("shutdown /r /t 0")
+            os.system("shutdown /r /t 0")
             os.system("echo 123")
