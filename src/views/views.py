@@ -26,6 +26,8 @@ from src.views.styles import (
 class MainWindow(QMainWindow):
     def __init__(self, action='0'):
         super().__init__()
+        self.query_button = None
+        self.cancel_button = None
         self.action = action
         self.remaining_time = WAIT_TIME
         self.countdown_txt = ""
@@ -65,7 +67,7 @@ class MainWindow(QMainWindow):
     def init_sub_window(self):
         self.setWindowTitle("计划执行")
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
-        self.setGeometry(100, 100, 300, 100)
+        self.setGeometry(100, 100, 300, 150)
         self.setFixedSize(self.width(), self.height())
         icon = QIcon(rf'{RES_PATH}\\icon.ico')
         self.setWindowIcon(icon)
@@ -91,12 +93,23 @@ class MainWindow(QMainWindow):
         set_label_styles(self.countdown_label_with_sub, font_size=12, color='red', bold=True)
         layout.addWidget(self.countdown_label_with_sub)
 
-        self.cancel_button = QPushButton('取消', self)
-        set_button_styles(self.cancel_button, background_color='#EB4444', hover_color='#CC0000')
+        self.cancel_button = QPushButton(f'取消{self.text}', self)
+        self.query_button = QPushButton(f'立即{self.text}', self)
+        set_button_styles(self.query_button, background_color='#EB4444', hover_color='#CC0000')
+        set_button_styles(self.cancel_button, background_color='#4CAF50', hover_color='#45a049')
         self.cancel_button.clicked.connect(self.cancel_action)
+        self.query_button.clicked.connect(self.execute_with_sub)
+        layout.addWidget(self.query_button)
         layout.addWidget(self.cancel_button)
 
         self.move_window()
+
+    def execute_with_sub(self):
+        if self.action[3].lower() == 's':
+            self.logic.execute_action('shutdown')
+        elif self.action[3].lower() == 'r':
+            self.logic.execute_action('reboot')
+
 
     def update_countdown_with_sub(self):
         self.remaining_time -= 1
@@ -104,10 +117,7 @@ class MainWindow(QMainWindow):
         self.countdown_label_with_sub.setText(self.countdown_txt_with_sub)
 
         if self.remaining_time < 1:
-            if self.action[3].lower() == 's':
-                self.logic.execute_action('shutdown')
-            elif self.action[3].lower() == 'r':
-                self.logic.execute_action('reboot')
+            self.execute_with_sub()
             self.timer.stop()
 
 

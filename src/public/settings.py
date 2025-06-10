@@ -14,7 +14,7 @@ for folder in [LOG_PATH, DB_PATH]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 PREFIXES = 'LORIENTIMER_'
-WAIT_TIME = 20
+WAIT_TIME = 10
 
 WEEKDAY_MAPPING = {
     "周一": 1,

@@ -139,9 +139,7 @@ class Logic:
     def execute_action(action):
         if action == "shutdown":
             logger.info('Shutdown now')
-            os.system("shutdown /s /t 0")
-            os.system("dir")
+            os.system("shutdown /f /s /t 0")
         elif action == "reboot":
             logger.info('Reboot now')
-            os.system("shutdown /r /t 0")
-            os.system("echo 123")
+            os.system("shutdown /f /r /t 0")

@@ -2,23 +2,24 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Lorien Timer"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "lorien"
 #define MyAppURL "https://hi-lorien.cn/"
 #define MyAppExeName "timer.exe"
+#define MyAppAssocName MyAppName + " File"
+#define MyAppAssocExt ".myp"
+#define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
 [Setup]
-; Tell Windows Explorer to reload the environment
-ChangesEnvironment=yes
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{0510EE5B-8884-4DA7-A084-BE2D8FD3AF77}
+AppId={{149A1836-5BA7-4C6F-9108-7159278FE971}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL} 
+AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
@@ -30,11 +31,12 @@ ArchitecturesAllowed=x64compatible
 ; meaning it should use the native 64-bit Program Files directory and
 ; the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64compatible
+ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
-;PrivilegesRequired=lowest
+PrivilegesRequired=admin
 OutputDir=D:\
-OutputBaseFilename=Timer Setup
+OutputBaseFilename={#MyAppName} {#MyAppVersion}
 SetupIconFile=E:\lxs-project\timer\dist\Timer\resources\icon.ico
 SolidCompression=yes
 WizardStyle=modern
@@ -46,13 +48,17 @@ Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.i
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-; Name: "addtopath"; Description: "Add application directory to system PATH environment variable"; GroupDescription: "Additional tasks:"; Flags: exclusive
-
 
 [Files]
 Source: "E:\lxs-project\timer\dist\Timer\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "E:\lxs-project\timer\dist\Timer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Registry]
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -61,5 +67,6 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
-[Registry]
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "Lorien Timer"; ValueData: "{app}/"; Flags: preservestringtype
+[Dirs]
+Name: {app}; Permissions: users-full
+
