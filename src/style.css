@@ -1,0 +1,446 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    overflow: hidden;
+}
+
+.app-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 主窗口 */
+.main-window {
+    width: 600px;
+    height: 420px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.window-header {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 自绘标题栏：深蓝头部直接充当窗体标题，可拖动 */
+.titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 0 0 0 16px;
+    height: 38px;
+    flex-shrink: 0;
+}
+
+.titlebar .window-title {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.titlebar-buttons {
+    display: flex;
+    align-self: stretch;
+}
+
+.tb-btn {
+    width: 46px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    font-family: 'Segoe MDL2 Assets', sans-serif;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s;
+}
+
+.tb-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.tb-btn.tb-close:hover {
+    background-color: #e81123;
+    color: #fff;
+}
+
+/* 无边框模式：内容铺满窗口，去掉卡片圆角阴影 */
+.app-container.flat {
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.app-container.flat .main-window {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* 自定义对话框（替代浏览器 alert/confirm） */
+.dialog-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.dialog-box {
+    width: 340px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.dialog-titlebar {
+    height: 34px;
+    padding-left: 14px;
+}
+
+.dialog-body {
+    padding: 22px 20px;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 20px 20px;
+}
+
+.dialog-buttons .btn {
+    min-width: 90px;
+    padding: 8px 20px;
+}
+
+.btn-ghost {
+    background-color: #e8e8e8;
+    color: #555;
+}
+
+.btn-ghost:hover {
+    background-color: #dcdcdc;
+}
+
+/* 标签按钮 */
+.tab-buttons {
+    display: flex;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: none;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+    background-color: #eee;
+    color: #333;
+}
+
+.tab-button.active {
+    color: #2c3e50;
+    border-bottom-color: #2c3e50;
+    background-color: #fff;
+}
+
+/* 标签内容区域 */
+.tab-container {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.tab-content {
+    height: 100%;
+}
+
+/* 倒计时显示 */
+.countdown-display {
+    font-size: 28px;
+    font-weight: bold;
+    color: #27ae60;
+    text-align: center;
+    padding: 15px 0;
+    margin-bottom: 15px;
+}
+
+/* 表单组 */
+.task-group {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.form-label {
+    width: 80px;
+    font-size: 14px;
+    color: #333;
+}
+
+.form-input, .form-select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus {
+    border-color: #3498db;
+}
+
+/* 按钮 */
+.button-row {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.btn {
+    padding: 10px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-danger {
+    background-color: #EB4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #CC0000;
+}
+
+.btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #45a049;
+}
+
+.btn-small {
+    padding: 5px 15px;
+    font-size: 12px;
+}
+
+/* 任务表格 */
+.task-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.task-table th {
+    background-color: #f5f5f5;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+}
+
+.task-table td {
+    padding: 8px 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.task-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* 关于页面 */
+.about-content {
+    padding: 20px;
+    line-height: 1.8;
+}
+
+.about-content h2 {
+    color: #2c3e50;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+.about-content p {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.about-content a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.about-content a:hover {
+    text-decoration: underline;
+}
+
+/* 倒计时小窗口 */
+.popup-window {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.popup-window .window-header {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+}
+
+.popup-content {
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: bold;
+    text-align: center;
+    padding: 15px 15px 5px;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 15px 15px;
+}
+
+/* 确认弹窗无边框模式：与主窗口 flat 风格一致，内容铺满窗口 */
+/* 使用 .popup-window.popup-flat 双类权重，避免被上方 .popup-window 覆盖 */
+.popup-window.popup-flat {
+    position: static;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.popup-window.popup-flat .popup-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    font-size: 17px;
+    font-weight: bold;
+    color: #2c3e50;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.popup-window.popup-flat .countdown-number {
+    font-size: 40px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin: 2px 0;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.popup-window.popup-flat .popup-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 16px 16px;
+    margin-top: 0;
+}
+
+.popup-window.popup-flat .popup-buttons .btn {
+    min-width: 120px;
+    padding: 9px 16px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

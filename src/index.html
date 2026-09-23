@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorien Timer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 计划任务触发时的确认弹窗（默认隐藏，由 main.js 根据启动模式切换） -->
+    <div class="app-container flat" id="confirmWindow" style="display: none;">
+        <div class="popup-window popup-flat">
+            <div class="window-header titlebar">
+                <span class="window-title" id="popupTitle">定时关机</span>
+                <div class="titlebar-buttons">
+                    <button class="tb-btn" id="confirmMin" title="最小化">&#xE921;</button>
+                    <button class="tb-btn tb-close" id="confirmClose" title="取消并关闭">&#xE947;</button>
+                </div>
+            </div>
+            <div class="popup-content">
+                <div>系统将在</div>
+                <div class="countdown-number" id="popupCountdown">10</div>
+                <div>秒后 <span id="popupActionText">关机</span>...</div>
+            </div>
+            <div class="popup-buttons">
+                <button class="btn btn-danger" id="popupExecute">立即关机</button>
+                <button class="btn btn-success" id="popupCancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container flat" id="mainWindow" style="display: none;">
+        <div class="main-window">
+            <div class="window-header titlebar">
+                <span class="window-title">Lorien Timer</span>
+                <div class="titlebar-buttons">
+                    <button class="tb-btn" id="tbMin" title="最小化">&#xE921;</button>
+                    <button class="tb-btn" id="tbClose" title="关闭">&#xE947;</button>
+                </div>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="0">设置任务</button>
+                <button class="tab-button" data-tab="1">查看任务</button>
+                <button class="tab-button" data-tab="2">关于</button>
+            </div>
+            
+            <div class="tab-container">
+                <!-- 设置任务标签 -->
+                <div class="tab-content" id="tab-settings">
+                    <div class="countdown-display" id="countdownLabel">
+                        00:00:00
+                    </div>
+                    
+                    <div class="task-group">
+                        <div class="form-row">
+                            <label class="form-label">时间:</label>
+                            <input type="time" id="timeEdit" class="form-input" value="00:00">
+                        </div>
+                        
+                        <div class="form-row">
+                            <label class="form-label">动作:</label>
+                            <select id="actionCombo" class="form-select">
+                                <option value="shutdown">关机</option>
+                                <option value="reboot">重启</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-row">
+                            <label class="form-label">循环:</label>
+                            <select id="loopCombo" class="form-select">
+                                <option value="1">每天</option>
+                                <option value="2">每周</option>
+                                <option value="3">每月</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-row" id="dayRow" style="display: none;">
+                            <label class="form-label" id="dayLabel">日:</label>
+                            <select id="daySelection" class="form-select"></select>
+                        </div>
+                    </div>
+                    
+                    <div class="button-row">
+                        <button id="addButton" class="btn btn-primary">添加任务</button>
+                    </div>
+                </div>
+                
+                <!-- 查看任务标签 -->
+                <div class="tab-content" id="tab-tasks" style="display: none;">
+                    <table class="task-table" id="taskTable">
+                        <thead>
+                            <tr>
+                                <th>动作</th>
+                                <th>时间</th>
+                                <th>循环</th>
+                                <th>日</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody">
+                        </tbody>
+                    </table>
+                    
+                    <div class="button-row">
+                        <button id="clearAllButton" class="btn btn-danger">清空全部</button>
+                    </div>
+                </div>
+                
+                <!-- 关于标签 -->
+                <div class="tab-content" id="tab-about" style="display: none;">
+                    <div class="about-content">
+                        <h2>帮助说明</h2>
+                        <p><b>▶ 设置定时任务：</b><br>
+                        您可以设置定时任务并激活它。到达预定时间点后，系统会弹出提示。如果您不处理提示，系统将在倒计时结束后执行操作。支持设置每天、每周、每月循环任务设定。</p>
+                        <p><b>▶ 关闭或取消任务：</b><br>
+                        到达任务触发时间，系统将弹出倒计时提示，若点击"取消"按钮，定时任务将不会继续执行。定时任务可设置多个时间点任务。</p>
+                        <p><b>▶ 任务管理：</b><br>
+                        在查看任务界面，您可以对定时任务进行单个取消或批量取消操作。</p>
+                        <h2>关于作者</h2>
+                        <p>作者：lorien<br>
+                        Github：<a href="https://github.com/lu-xianseng/timer" target="_blank">github.com/lu-xianseng/timer</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 自定义对话框（替代浏览器 alert/confirm） -->
+    <div class="dialog-mask" id="dialogMask" style="display: none;">
+        <div class="dialog-box">
+            <div class="window-header titlebar dialog-titlebar">
+                <span class="window-title" id="dialogTitle">提示</span>
+            </div>
+            <div class="dialog-body" id="dialogBody"></div>
+            <div class="dialog-buttons">
+                <button class="btn btn-ghost" id="dialogCancel" style="display: none;">取消</button>
+                <button class="btn btn-primary" id="dialogOk">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

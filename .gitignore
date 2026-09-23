@@ -1,0 +1,13 @@
+/target
+**/target
+/node_modules
+/dist
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*.log
+.env.local

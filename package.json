@@ -1,0 +1,15 @@
+{
+  "name": "lorien timer",
+  "version": "2.0.0",
+  "description": "适用于Windows系统的定时任务程序(关机和重启)",
+  "author": "lorien",
+  "license": "Apache-2.0",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "preview": "tauri preview"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
