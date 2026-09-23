@@ -1,9 +1,0 @@
-.venv
-__pycache__
-.idea
-.venv
-venv
-*.log
-build
-dist
-db
